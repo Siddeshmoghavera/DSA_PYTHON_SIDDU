@@ -50,4 +50,4 @@ class Solution:
 # ✅ Test Case 4 (Empty Array)
 # nums = []
 # Output:
-# 0
+#1
