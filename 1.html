@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Scorpio Line Animation</title>
+<style>
+    body {
+        margin: 0;
+        background: #0a0a0a;
+        overflow: hidden;
+    }
+    canvas {
+        display: block;
+    }
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+ctx.strokeStyle = "white";
+ctx.lineWidth = 1;
+ctx.lineCap = "round";
+
+let mouse = { x: canvas.width/2, y: canvas.height/2 };
+
+document.addEventListener("mousemove", e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+});
+
+// Scorpio body points
+let body = [];
+let segments = 30;
+let length = 8;
+
+for (let i = 0; i < segments; i++) {
+    body.push({
+        x: canvas.width / 2,
+        y: canvas.height / 2
+    });
+}
+
+function drawScorpio() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Head follows mouse
+    body[0].x += (mouse.x - body[0].x) * 0.2;
+    body[0].y += (mouse.y - body[0].y) * 0.2;
+
+    // Body follows previous segment
+    for (let i = 1; i < segments; i++) {
+        let dx = body[i-1].x - body[i].x;
+        let dy = body[i-1].y - body[i].y;
+        let angle = Math.atan2(dy, dx);
+
+        body[i].x = body[i-1].x - Math.cos(angle) * length;
+        body[i].y = body[i-1].y - Math.sin(angle) * length;
+    }
+
+    // Draw spine
+    ctx.beginPath();
+    for (let i = 0; i < segments; i++) {
+        ctx.lineTo(body[i].x, body[i].y);
+    }
+    ctx.stroke();
+
+    // Draw ribs (side lines like in reel)
+    for (let i = 2; i < segments-2; i++) {
+        let dx = body[i+1].x - body[i-1].x;
+        let dy = body[i+1].y - body[i-1].y;
+        let angle = Math.atan2(dy, dx) + Math.PI/2;
+
+        let ribLength = 12;
+
+        ctx.beginPath();
+        ctx.moveTo(body[i].x, body[i].y);
+        ctx.lineTo(
+            body[i].x + Math.cos(angle) * ribLength,
+            body[i].y + Math.sin(angle) * ribLength
+        );
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(body[i].x, body[i].y);
+        ctx.lineTo(
+            body[i].x - Math.cos(angle) * ribLength,
+            body[i].y - Math.sin(angle) * ribLength
+        );
+        ctx.stroke();
+    }
+
+    requestAnimationFrame(drawScorpio);
+}
+
+drawScorpio();
+</script>
+
+</body>
+</html>
